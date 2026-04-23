@@ -71,14 +71,14 @@
 
 <header>
   <h1>ROI Framework — RD Station Conversas</h1>
-  <span>Ferramenta para vendedores</span>
+  <span>Sales tool</span>
 </header>
 
 <div class="container">
 
   <div class="intro">
     <h2>Como usar esta ferramenta</h2>
-    <p>Ajuste os sliders com os dados do seu prospect durante a reunião de descoberta. Mostre o número de ROI <strong>antes de revelar o preço</strong>. Use os argumentos abaixo para escolher a dimensão que mais ressoa com o perfil do prospect.</p>
+    <p>Ajuste os sliders com os dados do seu cliente durante a reunião. Mostre o número de <strong>ROI</strong>. Use os argumentos abaixo para escolher a dimensão que mais ressoa com o perfil do cliente</p>
   </div>
 
   <!-- CALCULADORA -->
@@ -193,7 +193,7 @@
 
     <div class="story-item">
       <div class="story-hook">Para o perfil Operações/Financeiro: "Você sabe qual o custo real de cada atendimento hoje?"</div>
-      <div class="story-body">Com X atendimentos/mês e custo atual, a automação de 50% dos tickets repetitivos gera economia imediata sem reduzir qualidade. Use a calculadora acima ao vivo. Mostre o número antes de falar o preço.</div>
+      <div class="story-body">Com X atendimentos/mês e custo atual, a automação de 50% dos tickets repetitivos gera economia imediata sem reduzir qualidade. (Use a calculadora acima ao vivo).</div>
     </div>
 
     <div class="story-item">
@@ -208,7 +208,7 @@
 
     <div class="story-item">
       <div class="story-hook">Para o perfil que "já tem um bot": "Seu bot atual resolve tickets ou só desvia para o humano?"</div>
-      <div class="story-body">A diferença entre chatbot e IA conversacional não é tecnologia — é taxa de resolução. Chatbot: 30–50%. IA: 60–86%. O que não foi resolvido virou frustração, e frustração vira churn invisível.</div>
+      <div class="story-body">A diferença entre chatbot e IA conversacional é taxa de resolução. Chatbot: 30–50%. IA: 60–86%. O que não foi resolvido virou frustração, e frustração vira desistência.</div>
     </div>
   </div>
 
