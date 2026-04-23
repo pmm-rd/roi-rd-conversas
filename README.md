@@ -1,5 +1,3 @@
-# roi-rd-conversas
-Calculadora do ROI do RDSC
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
