@@ -1,1072 +1,1374 @@
-<!DOCTYPE html>
+c<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Tool Kit — RD Station Conversas</title>
+<title>Battle Card | RD Station vs Kommo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F0F4F8; color: #1E293B; min-height: 100vh; }
+  :root {
+    --rd-cyan:   #00c9eb;
+    --rd-dark:   #002233;
+    --rd-purple: #a34dff;
+    --rd-pink:   #ff009e;
+    --rd-orange: #ff8900;
+    --bg:        #ffffff;
+    --bg-card:   #f4f9fb;
+    --bg-card2:  #e8f4f8;
+    --border:    #cce8f2;
+    --text:      #002233;
+    --text-muted:#3d7a90;
+  }
 
-  header { background: #00A896; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  header h1 { font-size: 18px; font-weight: 600; color: #fff; }
-  header span { font-size: 13px; color: rgba(255,255,255,0.85); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* Sticky nav bar */
-  .sticky-nav { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid #E2E8F0; padding: 10px 24px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  .sticky-nav-label { font-size: 12px; color: #64748B; font-weight: 500; }
-  .nav-btn { font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: none; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-block; }
-  .nav-btn-calc { background: rgba(0,168,150,0.1); color: #00A896; }
-  .nav-btn-calc:hover { background: rgba(0,168,150,0.2); }
-  .nav-btn-bench { background: #FFF7ED; color: #B45309; border: 1px solid #FED7AA; }
-  .nav-btn-bench:hover { background: #FED7AA; }
-  .nav-btn-bench-icon { margin-right: 4px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-  /* Popup reminder */
-  .popup-reminder { position: fixed; bottom: 24px; right: 24px; z-index: 100; background: #fff; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); padding: 18px 20px; max-width: 300px; border-left: 4px solid #F59E0B; display: none; animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
-  .popup-reminder.visible { display: block; }
-  .popup-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-  .popup-icon { font-size: 20px; flex-shrink: 0; }
-  .popup-title { font-size: 13px; font-weight: 700; color: #1E293B; line-height: 1.3; }
-  .popup-desc { font-size: 12px; color: #64748B; line-height: 1.5; }
-  .popup-close { font-size: 16px; color: #94A3B8; cursor: pointer; flex-shrink: 0; line-height: 1; background: none; border: none; padding: 0; }
-  .popup-close:hover { color: #475569; }
-  .popup-cta { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600; color: #fff; background: #F59E0B; padding: 6px 14px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; width: 100%; text-align: center; }
-  .popup-cta:hover { background: #D97706; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #00c9eb1a 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-  .container { max-width: 980px; margin: 0 auto; padding: 32px 24px; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 34, 51, 0.72);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.3s ease;
+  }
 
-  .intro { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 28px; border-left: 4px solid #00A896; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .intro h2 { font-size: 16px; font-weight: 600; color: #00A896; margin-bottom: 8px; }
-  .intro p { font-size: 14px; color: #475569; line-height: 1.6; }
-  .intro p strong { color: #1E293B; }
+  .modal-overlay.hidden {
+    display: none;
+  }
 
-  .section-title { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .modal {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 24px 80px rgba(0, 34, 51, 0.3);
+    position: relative;
+    animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-top: 5px solid var(--rd-cyan);
+  }
 
-  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .card h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
 
-  .field { margin-bottom: 20px; }
-  .field label { display: block; font-size: 14px; font-weight: 600; color: #1E293B; margin-bottom: 6px; }
-  .field-hint { font-size: 11px; color: #94A3B8; margin-bottom: 8px; font-style: italic; }
-  .field-row { display: flex; align-items: center; gap: 12px; }
-  input[type="range"] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: #E2E8F0; outline: none; }
-  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00A896; cursor: pointer; }
-  .field-val { font-size: 14px; font-weight: 700; color: #00A896; min-width: 80px; text-align: right; }
+  .modal-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
 
-  .derived { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .derived-label { font-size: 12px; color: #64748B; }
-  .derived-val { font-size: 14px; font-weight: 700; color: #F59E0B; }
+  .modal-logo-dot {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--rd-cyan), var(--rd-purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
 
-  /* Yes/No toggle for repetitive */
-  .yn-row { display: flex; gap: 10px; margin-top: 6px; }
-  .yn-btn { flex: 1; padding: 10px; border: 2px solid #E2E8F0; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; color: #64748B; cursor: pointer; transition: all 0.15s; text-align: center; }
-  .yn-btn:hover { border-color: #00A896; color: #00A896; }
-  .yn-btn.active-yes { border-color: #00A896; background: rgba(0,168,150,0.08); color: #00A896; }
-  .yn-btn.active-no { border-color: #94A3B8; background: #F8FAFC; color: #475569; }
+  .modal-logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--rd-dark);
+  }
 
-  /* Scenarios */
-  .scenarios { margin-top: 14px; display: none; }
-  .scenarios.visible { display: block; }
-  .scenarios-title { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 10px; }
-  .scenario-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-  .scenario-card { background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
-  .scenario-card:hover { border-color: #00A896; }
-  .scenario-card.active { border-color: #00A896; background: rgba(0,168,150,0.07); }
-  .sc-pct { font-size: 18px; font-weight: 800; color: #00A896; }
-  .sc-lbl { font-size: 10px; color: #64748B; margin-top: 2px; }
-  .sc-economia { font-size: 11px; font-weight: 600; color: #F59E0B; margin-top: 6px; }
+  .modal-logo-text span {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 13px;
+    display: block;
+    margin-top: 1px;
+  }
 
-  .no-data-msg { margin-top: 10px; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #92400E; display: none; }
-  .no-data-msg.visible { display: block; }
+  .modal-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--rd-dark);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
 
-  /* Toggle */
-  .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .toggle-label { font-size: 13px; color: #475569; }
-  .toggle-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; inset: 0; background: #CBD5E1; border-radius: 22px; cursor: pointer; transition: background 0.2s; }
-  .toggle-slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-  .toggle-switch input:checked + .toggle-slider { background: rgba(239,68,68,0.35); }
-  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); }
+  .modal-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
 
-  /* Blindspot */
-  .blindspot { background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 10px; padding: 16px; margin-top: 6px; display: none; }
-  .blindspot.visible { display: block; }
-  .blindspot-title { font-size: 13px; font-weight: 700; color: #DC2626; margin-bottom: 10px; }
-  .bs-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-  .bs-stat { background: #fff; border-radius: 8px; padding: 10px; text-align: center; border: 1px solid #FECACA; }
-  .bs-val { font-size: 17px; font-weight: 700; color: #DC2626; margin-bottom: 2px; }
-  .bs-lbl { font-size: 10px; color: #94A3B8; line-height: 1.4; }
-  .blindspot-msg { font-size: 12px; color: #7F1D1D; line-height: 1.6; background: #fff; border-radius: 8px; padding: 10px 12px; border-left: 3px solid #EF4444; }
-  .blindspot-msg strong { color: #1E293B; }
+  .form-group {
+    margin-bottom: 18px;
+  }
 
-  .conv-slider { display: none; }
-  .conv-slider.visible { display: block; }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rd-dark);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
 
-  /* Results */
-  .results { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .results h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 18px; }
-  .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  @media (max-width: 540px) { .result-grid { grid-template-columns: 1fr 1fr; } }
-  .stat { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; text-align: center; position: relative; }
-  .stat-val { font-size: 20px; font-weight: 700; color: #00A896; margin-bottom: 4px; }
-  .stat-lbl { font-size: 11px; color: #64748B; line-height: 1.4; }
-  .stat.dimmed .stat-val { color: #CBD5E1; }
-  .stat.dimmed .stat-lbl { color: #CBD5E1; }
+  .form-label .required {
+    color: var(--rd-pink);
+    margin-left: 2px;
+  }
 
-  /* Tooltip */
-  .tip-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #E2E8F0; color: #64748B; font-size: 10px; font-weight: 700; cursor: help; position: absolute; top: 8px; right: 8px; }
-  .tip-icon:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; right: 0; background: #1E293B; color: #fff; font-size: 11px; font-weight: 400; padding: 6px 10px; border-radius: 6px; white-space: normal; width: 200px; line-height: 1.4; z-index: 10; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .form-select,
+  .form-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--rd-dark);
+    background: #f8fcfd;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
 
-  /* Cenário buttons */
-  .cenario-btn { background: #F1F5F9; border: 1.5px solid #E2E8F0; border-radius: 6px; font-size: 10px; font-weight: 600; color: #64748B; cursor: pointer; padding: 4px 6px; line-height: 1.3; transition: all 0.15s; text-align: center; }
-  .cenario-btn:hover { border-color: #00A896; color: #00A896; }
-  .cenario-btn.active { border-color: #00A896; background: rgba(0,168,150,0.1); color: #00A896; }
+  .select-wrap {
+    position: relative;
+  }
 
-  /* Benefits table */
-  .benefits-table { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px; margin: 16px 0; }
-  .benefits-title { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
-  .benefit-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #E2E8F0; }
-  .benefit-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .benefit-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-  .benefit-body { flex: 1; }
-  .benefit-headline { font-size: 13px; font-weight: 600; color: #1E293B; margin-bottom: 4px; line-height: 1.4; }
-  .benefit-desc { font-size: 12px; color: #64748B; line-height: 1.6; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
 
-  /* Rational compact */
-  .rational-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #E2E8F0; font-size: 12px; gap: 8px; }
-  .rational-row:last-child { border-bottom: none; }
-  .rational-desc { color: #475569; flex: 1; font-weight: 500; }
-  .rational-result { color: #1E293B; font-weight: 600; text-align: right; min-width: 90px; }
-  .rational-result.highlight { color: #00A896; }
-  .rational-tip { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #E2E8F0; color: #64748B; font-size: 10px; font-weight: 700; cursor: help; flex-shrink: 0; position: relative; }
-  .rational-tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; right: 0; background: #1E293B; color: #fff; font-size: 11px; font-weight: 400; padding: 8px 12px; border-radius: 6px; white-space: normal; width: 280px; line-height: 1.6; z-index: 10; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .form-select:focus,
+  .form-input:focus {
+    border-color: var(--rd-cyan);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 201, 235, 0.15);
+  }
 
-  .roi-box { background: #00A896; border-radius: 10px; padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .roi-box-left h4 { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.95); }
-  .roi-box-left p { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 4px; max-width: 480px; }
-  .roi-number { font-size: 48px; font-weight: 800; color: #fff; white-space: nowrap; }
+  .form-input::placeholder {
+    color: #9bbfcc;
+  }
 
-  /* Benchmark */
-  .benchmark-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  @media (max-width: 640px) { .benchmark-wrap { grid-template-columns: 1fr; } }
-  .bench-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .bench-card h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
-  .compare-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; }
-  .compare-row:last-child { border-bottom: none; }
-  .compare-dim { color: #475569; font-weight: 500; }
-  .bench-source { font-size: 10px; color: #CBD5E1; margin-top: 12px; font-style: italic; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .badge-g { background: rgba(16,185,129,0.12); color: #059669; }
-  .badge-r { background: rgba(239,68,68,0.1); color: #DC2626; }
-  .badge-y { background: rgba(245,158,11,0.1); color: #B45309; }
+  .modal-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--rd-dark);
+    color: var(--rd-cyan);
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    margin-top: 8px;
+    letter-spacing: 0.01em;
+  }
 
-  /* Risk card */
-  .risk-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .risk-card h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
-  .risk-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
-  .risk-row:last-child { border-bottom: none; }
-  .risk-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-  .risk-body { flex: 1; }
-  .risk-title { font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 3px; }
-  .risk-desc { font-size: 11px; color: #64748B; line-height: 1.5; }
-  .risk-stat { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; color: #DC2626; background: #FEF2F2; padding: 2px 8px; border-radius: 6px; }
+  .modal-btn:hover {
+    background: #003a55;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 34, 51, 0.2);
+  }
 
-  /* Perguntas grid */
-  .perguntas { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .perguntas h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .perguntas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-  @media (max-width: 640px) { .perguntas-grid { grid-template-columns: 1fr; } }
-  .pq-card { background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
-  .pq-card:hover { border-color: #00A896; }
-  .pq-card.open { border-color: #00A896; background: #fff; }
-  .pq-top { display: flex; align-items: flex-start; gap: 10px; padding: 14px; }
-  .pq-icon { font-size: 22px; flex-shrink: 0; }
-  .pq-q { font-size: 13px; font-weight: 600; color: #1E293B; flex: 1; line-height: 1.4; }
-  .pq-arrow { font-size: 10px; color: #94A3B8; flex-shrink: 0; margin-top: 3px; transition: transform 0.2s; }
-  .pq-card.open .pq-arrow { transform: rotate(180deg); }
-  .pq-a { font-size: 12px; color: #475569; line-height: 1.65; padding: 0 14px 14px 46px; display: none; }
-  .pq-a.open { display: block; }
-  .pergunta-tip { display: inline-block; margin-top: 8px; font-size: 11px; color: #B45309; background: rgba(245,158,11,0.1); padding: 3px 8px; border-radius: 6px; }
+  .modal-btn:active {
+    transform: translateY(0);
+  }
 
-  /* Casos grid */
-  .casos { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-  .casos h3 { font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-  .casos-sub { font-size: 12px; color: #94A3B8; margin-bottom: 16px; }
-  .casos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 720px) { .casos-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 480px) { .casos-grid { grid-template-columns: 1fr; } }
-  .caso-visual { background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s; }
-  .caso-visual:hover { border-color: #00A896; }
-  .caso-emoji { font-size: 32px; text-align: center; padding: 10px 0 4px; }
-  .caso-tag { display: inline-block; font-size: 10px; font-weight: 600; color: #059669; background: rgba(0,168,150,0.1); padding: 2px 8px; border-radius: 6px; text-align: center; }
-  .caso-title { font-size: 13px; font-weight: 700; color: #1E293B; line-height: 1.3; }
-  .caso-desafio { font-size: 11px; color: #94A3B8; line-height: 1.5; }
-  .caso-solucao { font-size: 12px; color: #475569; line-height: 1.55; flex: 1; }
-  .caso-link { font-size: 11px; color: #00A896; text-decoration: none; font-weight: 600; }
-  .caso-link:hover { text-decoration: underline; }
+  .modal-error {
+    font-size: 12px;
+    color: var(--rd-pink);
+    margin-top: 6px;
+    display: none;
+  }
 
-  /* Exit popup */
-  .exit-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
-  .exit-overlay.visible { display: flex; }
-  .exit-modal { background: #fff; border-radius: 16px; padding: 32px 28px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.25s ease; }
-  @keyframes popIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform: scale(1); } }
-  .exit-emoji { font-size: 40px; margin-bottom: 12px; }
-  .exit-title { font-size: 18px; font-weight: 700; color: #1E293B; margin-bottom: 8px; }
-  .exit-desc { font-size: 13px; color: #64748B; line-height: 1.6; margin-bottom: 20px; }
-  .exit-btn-primary { display: block; width: 100%; background: #F59E0B; color: #fff; font-size: 14px; font-weight: 700; padding: 12px; border-radius: 10px; border: none; cursor: pointer; margin-bottom: 10px; }
-  .exit-btn-primary:hover { background: #D97706; }
-  .exit-btn-secondary { font-size: 12px; color: #94A3B8; background: none; border: none; cursor: pointer; text-decoration: underline; }
-  footer { text-align: center; padding: 28px 24px; font-size: 11px; color: #94A3B8; line-height: 1.7; }
+  .modal-success {
+    text-align: center;
+    padding: 10px 0 4px;
+    display: none;
+  }
+
+  .modal-success-icon {
+    font-size: 48px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .modal-success-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--rd-dark);
+    margin-bottom: 6px;
+  }
+
+  .modal-success-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .registro-bar {
+    display: none;
+    background: linear-gradient(90deg, #e6fafd, #f3eeff);
+    border-bottom: 1.5px solid var(--border);
+    padding: 10px 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .registro-bar.visible {
+    display: flex;
+  }
+
+  .registro-bar strong {
+    color: #007a92;
+  }
+
+  .registro-bar .reg-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rd-dark);
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    padding: 40px 0 32px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e6fafd;
+    border: 1px solid #90dff0;
+    color: #006d80;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--rd-dark);
+  }
+
+  h1 .rd    { color: #007a92; }
+  h1 .vs    { color: #9bbfcc; font-weight: 400; font-size: 0.72em; }
+  h1 .kommo { color: var(--rd-orange); }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  .central-message {
+    background: linear-gradient(135deg, #e6fafd, #f3eeff);
+    border: 1.5px solid #90dff0;
+    border-radius: 16px;
+    padding: 20px 56px 20px 24px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #003d52;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .central-message::after {
+    content: '💡';
+    font-size: 26px;
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    opacity: 0.45;
+  }
+  .central-message strong { color: #007a92; }
+
+  .score-board {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 40px;
+    background: var(--rd-dark);
+    border-radius: 20px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,34,51,0.14);
+  }
+
+  .score-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .score-name.rd    { color: var(--rd-cyan); }
+  .score-name.kommo { color: var(--rd-orange); }
+
+  .score-number {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-number.rd    { color: var(--rd-cyan);   text-shadow: 0 0 40px rgba(0,201,235,0.5); }
+  .score-number.kommo { color: var(--rd-orange);  text-shadow: 0 0 40px rgba(255,137,0,0.45); }
+
+  .score-label {
+    font-size: 12px;
+    color: #4a8fa3;
+    margin-top: 4px;
+  }
+
+  .vs-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #4a8fa3;
+    background: #003a55;
+    border: 1px solid #005572;
+    border-radius: 50%;
+    width: 52px; height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 40px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 1px 4px rgba(0,34,51,0.06);
+  }
+  .filter-btn:hover {
+    border-color: var(--rd-cyan);
+    color: #007a92;
+    background: #e6fafd;
+  }
+  .filter-btn.active {
+    background: var(--rd-dark);
+    border-color: var(--rd-dark);
+    color: var(--rd-cyan);
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,34,51,0.2);
+  }
+  .filter-btn.active.kommo-filter {
+    background: var(--rd-orange);
+    border-color: var(--rd-orange);
+    color: #fff;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+  }
+  .search-wrap span {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  #search {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    border-radius: 40px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border 0.18s;
+    box-shadow: 0 1px 4px rgba(0,34,51,0.06);
+  }
+  #search:focus { border-color: var(--rd-cyan); }
+  #search::placeholder { color: #9bbfcc; }
+
+  .section { margin-bottom: 52px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-emoji { font-size: 22px; }
+  .section-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--rd-dark);
+  }
+  .section-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,34,51,0.06);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 16px 16px 0 0;
+  }
+  .card.win::before  { background: linear-gradient(90deg, #00c9eb, #a34dff); }
+  .card.lose::before { background: linear-gradient(90deg, #ff8900, #ff009e); }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,201,235,0.15);
+    border-color: var(--rd-cyan);
+  }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .card-tag.win  { background: #e6fafd; color: #007a92; border: 1px solid #90dff0; }
+  .card-tag.lose { background: #fff3e6; color: #b05000; border: 1px solid #ffc480; }
+
+  .card-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+    color: var(--rd-dark);
+  }
+  .card-body {
+    font-size: 13.5px;
+    color: #345a6a;
+    line-height: 1.7;
+  }
+  .card-body strong { color: var(--rd-dark); font-weight: 700; }
+
+  .objection-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,34,51,0.05);
+  }
+  .objection-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,201,235,0.12);
+    border-color: var(--rd-cyan);
+  }
+
+  .objection-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+    background: #fff;
+    transition: background 0.18s;
+  }
+  .objection-header:hover { background: #f4fbfd; }
+
+  .objection-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .objection-question {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    flex: 1;
+    line-height: 1.4;
+    color: #b05000;
+  }
+
+  .objection-toggle {
+    font-size: 18px;
+    color: #9bbfcc;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    margin-top: 2px;
+  }
+  .objection-card.open .objection-toggle { transform: rotate(180deg); }
+
+  .objection-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.42s cubic-bezier(0.4,0,0.2,1);
+  }
+  .objection-card.open .objection-answer { max-height: 700px; }
+
+  .objection-answer-inner {
+    padding: 16px 24px 20px 52px;
+    border-top: 1.5px solid var(--border);
+    background: #f4fbfd;
+  }
+
+  .answer-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #007a92;
+    margin-bottom: 8px;
+  }
+
+  .answer-text {
+    font-size: 14px;
+    color: #1e4d5e;
+    line-height: 1.78;
+  }
+  .answer-text strong { color: var(--rd-dark); font-weight: 700; }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+  }
+  .compare-table th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 12px 18px;
+    text-align: left;
+  }
+  .compare-table th:first-child { color: var(--text-muted); width: 22%; }
+  .compare-table th.kommo-head {
+    color: #b05000;
+    background: #fff3e6;
+    border-radius: 10px 0 0 10px;
+    border: 1.5px solid #ffc480;
+  }
+  .compare-table th.rd-head {
+    color: #007a92;
+    background: #e6fafd;
+    border-radius: 0 10px 10px 0;
+    border: 1.5px solid #90dff0;
+  }
+  .compare-table td {
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #345a6a;
+    vertical-align: top;
+    line-height: 1.6;
+    background: #fff;
+    border-top: 1.5px solid var(--border);
+    border-bottom: 1.5px solid var(--border);
+  }
+  .compare-table td:first-child {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rd-dark);
+    border-radius: 10px 0 0 10px;
+    border-left: 1.5px solid var(--border);
+  }
+  .compare-table tr td:last-child {
+    border-radius: 0 10px 10px 0;
+    border-right: 1.5px solid var(--border);
+  }
+  .compare-table tbody tr:hover td { background: #f4fbfd; }
+  .compare-table td .win-dot::before  { content: '✅ '; }
+  .compare-table td .lose-dot::before { content: '❌ '; }
+
+  .killer-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 22px 22px 26px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 18px;
+    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,34,51,0.05);
+  }
+  .killer-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #00c9eb, #a34dff);
+    border-radius: 16px 0 0 16px;
+  }
+  .killer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,201,235,0.14);
+    border-color: var(--rd-cyan);
+  }
+
+  .killer-num {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #b8dfe8;
+    flex-shrink: 0;
+    line-height: 1;
+    width: 36px;
+    text-align: right;
+  }
+
+  .killer-q {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--rd-dark);
+    line-height: 1.4;
+  }
+
+  .reality-block {
+    background: #fff8f0;
+    border: 1.5px solid #ffd0a0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #6b3200;
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  .reality-block::before {
+    content: '⚠️ Kommo: ';
+    font-weight: 700;
+    color: #b05000;
+  }
+
+  .rd-block {
+    background: #e6fafd;
+    border: 1.5px solid #90dff0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #003d52;
+    line-height: 1.6;
+  }
+  .rd-block::before {
+    content: '✅ RD Station: ';
+    font-weight: 700;
+    color: #007a92;
+  }
+
+  footer {
+    border-top: 2px solid var(--border);
+    padding: 28px 0;
+    margin-top: 60px;
+    text-align: center;
+    font-size: 12px;
+    color: #9bbfcc;
+  }
+  footer strong { color: #007a92; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .score-board { grid-template-columns: 1fr; }
+    .vs-badge { margin: 0 auto; }
+    .compare-table { font-size: 12px; }
+    .compare-table th, .compare-table td { padding: 10px 12px; }
+    .objection-answer-inner { padding-left: 20px; }
+    .modal { padding: 28px 20px; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeInUp 0.45s ease both; }
+  .animate-in:nth-child(1) { animation-delay: 0.05s; }
+  .animate-in:nth-child(2) { animation-delay: 0.10s; }
+  .animate-in:nth-child(3) { animation-delay: 0.15s; }
+  .animate-in:nth-child(4) { animation-delay: 0.20s; }
+  .animate-in:nth-child(5) { animation-delay: 0.25s; }
+  .animate-in:nth-child(6) { animation-delay: 0.30s; }
+  .animate-in:nth-child(7) { animation-delay: 0.35s; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Sales Tool Kit — RD Station Conversas</h1>
-  <span>Ferramenta interna para vendedores</span>
-</header>
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
 
-<!-- Sticky nav -->
-<div class="sticky-nav">
-  <span class="sticky-nav-label">Ir para:</span>
-  <a class="nav-btn nav-btn-calc" href="#custo-atendimento">🧮 Calculadora</a>
-  <a class="nav-btn nav-btn-bench" href="#benchmarks"><span class="nav-btn-bench-icon">⚡</span>Lead sem dados? Pule para benchmarks</a>
-</div>
+    <div class="modal-logo">
+      <div class="modal-logo-dot">⚔️</div>
+      <div class="modal-logo-text">
+        Battle Card
+        <span>RD Station vs Kommo</span>
+      </div>
+    </div>
 
-<!-- Pop-up lembrete -->
-<div class="popup-reminder" id="popup-opp">
-  <div class="popup-top">
-    <span class="popup-icon">📋</span>
-    <div class="popup-title">Lembra de preencher o número da oportunidade!</div>
-    <button class="popup-close" onclick="fecharPopup()">×</button>
+    <!-- Form state -->
+    <div id="modal-form-state">
+      <div class="modal-title">Registre sua negociação</div>
+      <div class="modal-subtitle">Informe para qual negociação você utilizará este battle card antes de continuar.</div>
+
+      <div class="form-group">
+        <label class="form-label" for="modal-nome">Seu nome <span class="required">*</span></label>
+        <input
+          class="form-input"
+          type="text"
+          id="modal-nome"
+          placeholder="Digite seu nome completo..."
+        />
+        <div class="modal-error" id="error-nome">Por favor, informe seu nome.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="modal-opp">Link da oportunidade (Salesforce) <span class="required">*</span></label>
+        <input
+          class="form-input"
+          type="text"
+          id="modal-opp"
+          placeholder="Ex: https://rdstation.lightning.force.com/lightning/r/Opportunity/..."
+        />
+        <div class="modal-error" id="error-opp">Por favor, informe o número da oportunidade.</div>
+      </div>
+
+      <button class="modal-btn" onclick="submitModal()">Acessar Battle Card →</button>
+    </div>
+
+    <!-- Success state -->
+    <div class="modal-success" id="modal-success">
+      <span class="modal-success-icon">✅</span>
+      <div class="modal-success-title">Registro salvo!</div>
+      <div class="modal-success-sub">Tudo certo, <strong id="success-nome"></strong>. Boa negociação! 🚀</div>
+      <button class="modal-btn" onclick="closeModal()">Abrir Battle Card</button>
+    </div>
+
   </div>
-  <p class="popup-desc">Antes de apresentar os resultados ao lead, certifique-se de ter preenchido o número da oportunidade no Salesforce lá no início da página.</p>
-  <button class="popup-cta" onclick="irParaFormulario()">↑ Ir para o formulário</button>
 </div>
 
-<!-- Pop-up de saída -->
-<div class="exit-overlay" id="exit-overlay">
-  <div class="exit-modal">
-    <div class="exit-emoji">📋</div>
-    <div class="exit-title">Ei, não esqueça do formulário!</div>
-    <div class="exit-desc">Antes de fechar, certifique-se de ter preenchido o seu nome e o número da oportunidade no Salesforce. Isso garante que a simulação fique registrada.</div>
-    <button class="exit-btn-primary" onclick="irParaFormularioExit()">↑ Preencher agora</button>
-    <button class="exit-btn-secondary" onclick="fecharExitPopup()">Já preenchi, pode fechar</button>
-  </div>
+<!-- ── REGISTRO BAR ── -->
+<div class="registro-bar" id="registro-bar">
+  🗂️ Negociação registrada:
+  <span class="reg-tag">👤 <span id="bar-nome"></span></span>
+  <span class="reg-tag">🔖 <span id="bar-opp"></span></span>
 </div>
 
+<!-- ── PAGE ── -->
 <div class="container">
 
-  <div class="intro" id="calculadora">
-    <h2>Como usar esta ferramenta</h2>
-    <p>Preencha os campos abaixo com os dados do prospect durante a descoberta. <strong>Se o cliente não souber nenhum dado, use o botão acima para ir direto aos benchmarks de mercado.</strong> Mostre o número de ROI antes de revelar o preço da ferramenta.</p>
-  </div>
-
-  <!-- Formulário de identificação -->
-  <div class="card" style="margin-bottom: 28px; border: 2px solid #00A896;" id="form-identificacao">
-    <h3>Identificação da simulação</h3>
-    <form id="registroForm">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div class="field" style="margin-bottom:0;">
-          <label>Seu nome</label>
-          <select id="vendedor_nome" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #E2E8F0; background:#fff; height:40px; font-size:13px; color:#1E293B;">
-            <option value="" disabled selected>Selecione seu nome...</option>
-            <option value="Daniel Machado">Daniel Machado</option>
-            <option value="Everardo Montenegro">Everardo Montenegro</option>
-            <option value="Gabriela Cidade">Gabriela Cidade</option>
-            <option value="Gabriela Sousa">Gabriela Sousa</option>
-            <option value="Joyce Rosa">Joyce Rosa</option>
-            <option value="Lizie Archer">Lizie Archer</option>
-            <option value="Leticia Zótis">Leticia Zótis</option>
-            <option value="Mayara Maia">Mayara Maia</option>
-            <option value="Mellory Oliveira">Mellory Oliveira</option>
-
-          </select>
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>Link OU nome da oportunidade no Salesfoce</label>
-          <input type="text" id="sf_id" required placeholder="Ex: 0D5V200002..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #E2E8F0; font-size:13px; color:#1E293B;">
-        </div>
-      </div>
-      <button type="submit" id="btnSalvar" style="width:100%; background:#00A896; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:700; cursor:pointer; margin-top:14px; font-size:14px;">
-        Salvar na planilha
-      </button>
-    </form>
-    <p id="msgSucesso" style="display:none; color:#059669; font-size:13px; margin-top:10px; text-align:center; font-weight:600;">✔ Dados salvos com sucesso!</p>
-  </div>
-
-  <script>
-  document.getElementById('registroForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnSalvar');
-    const msg = document.getElementById('msgSucesso');
-    const nome = document.getElementById('vendedor_nome').value;
-    const opp  = document.getElementById('sf_id').value;
-    btn.innerText = 'Salvando...';
-    btn.disabled = true;
-    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbzq6Zt6Lcknr918f5FIlTYJi-hO0cabcK7LK3iHGQAiYKtJeHyHo9hWwUfIc6d0McLN/exec';
-    fetch(`${URL_SCRIPT}?nome=${encodeURIComponent(nome)}&oportunidade=${encodeURIComponent(opp)}`, { method:'GET', mode:'no-cors' })
-      .then(() => { msg.style.display='block'; btn.innerText='Salvo!'; btn.style.background='#94A3B8'; popupSalvo = true; })
-      .catch(err => { console.error(err); alert('Erro ao salvar.'); btn.disabled=false; btn.innerText='Tentar novamente'; });
-  });
-  </script>
-  <p class="section-title" id="custo-atendimento">1. Custo atual de atendimento</p>
-  <div class="grid2" style="margin-bottom: 8px;">
-    <div class="card">
-      <h3>Equipe de atendimento</h3>
-
-      <div class="field">
-        <label>Quantas pessoas fazem atendimento?</label>
-        <div class="field-hint">Inclua todos que respondem clientes — WhatsApp, telefone, chat, e-mail.</div>
-        <div class="field-row">
-          <input type="range" min="1" max="50" step="1" value="3" id="s-func" oninput="calc()">
-          <span class="field-val" id="v-func">3</span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Salário médio por atendente (R$)</label>
-        <div class="field-hint">Salário + encargos. Estimativa comum para atendente CLT: R$2.500–R$4.000.</div>
-        <div class="field-row">
-          <input type="range" min="1500" max="8000" step="100" value="3000" id="s-salario" oninput="calc()">
-          <span class="field-val" id="v-salario">R$3.000</span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>% do tempo dedicado ao atendimento</label>
-        <div class="field-hint">Se responde clientes o dia todo = 100%. Se divide com outras tarefas = 50%.</div>
-        <div class="field-row">
-          <input type="range" min="10" max="100" step="5" value="70" id="s-tempo" oninput="calc()">
-          <span class="field-val" id="v-tempo">70%</span>
-        </div>
-      </div>
-
-      <div class="derived">
-        <span class="derived-label">Custo mensal de atendimento estimado</span>
-        <span class="derived-val" id="d-custo-total">R$6.300</span>
-      </div>
+  <header>
+    <div>
+      <div class="badge">⚔️ Battle Card</div>
+      <h1><span class="rd">RD Station</span> <span class="vs">vs</span> <span class="kommo">Kommo</span></h1>
+      <p class="header-sub">Guia estratégico para vendedores — saiba exatamente como posicionar, argumentar e fechar contra a Kommo.</p>
     </div>
+  </header>
 
-    <div class="card">
-      <h3>Volume e perfil de atendimentos</h3>
+  <div class="central-message">
+    <strong>Mensagem Central:</strong> A RD Station é a escolha de quem busca a potência de duas plataformas especialistas que trabalham juntas — uma para CRM e outra para Conversacional. Ao contrário de modelos genéricos, entregamos profundidade nativa em cada frente, garantindo robustez e estabilidade para profissionalizar sua escala com <strong>suporte local</strong> de quem entende o mercado brasileiro.
+  </div>
 
-      <div class="field">
-        <label>Atendimentos por mês</label>
-        <div class="field-hint">Número de atendimentos que o time resolve por mês — WhatsApp, chat, telefone, e-mail. Pode ser aproximado.</div>
-        <div class="field-row">
-          <input type="range" min="10" max="10000" step="10" value="200" id="s-atend" oninput="calc()">
-          <span class="field-val" id="v-atend">200</span>
-        </div>
-        <div class="derived" style="margin-top: 8px;">
-          <span class="derived-label">Custo estimado por atendimento</span>
-          <span class="derived-val" id="d-custo-por">R$0</span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>O seu time precisa responder perguntas simples e repetitivas?</label>
-        <div class="field-hint">Ex: horário de funcionamento, status de pedido, preço, como remarcar, segunda via de boleto, prazo de entrega.</div>
-        <div class="yn-row">
-          <button class="yn-btn active-yes" id="btn-sim" onclick="selectRepetitivo('sim')">✓ Sim</button>
-          <button class="yn-btn" id="btn-nao" onclick="selectRepetitivo('nao')">✗ Não / Não sabe</button>
-        </div>
-
-        <div class="scenarios visible" id="scenarios-box">
-          <div class="scenarios-title">Se sim — escolha o cenário que melhor descreve a operação:</div>
-          <div class="scenario-cards">
-            <div class="scenario-card" id="sc10" onclick="selectScenario(10)">
-              <div class="sc-pct">10%</div>
-              <div class="sc-lbl">Poucos atendimentos repetitivos</div>
-              <div class="sc-economia" id="sc10-val">—</div>
-            </div>
-            <div class="scenario-card active" id="sc30" onclick="selectScenario(30)">
-              <div class="sc-pct">30%</div>
-              <div class="sc-lbl">Cenário mais comum</div>
-              <div class="sc-economia" id="sc30-val">—</div>
-            </div>
-            <div class="scenario-card" id="sc50" onclick="selectScenario(50)">
-              <div class="sc-pct">50%</div>
-              <div class="sc-lbl">Alto volume repetitivo</div>
-              <div class="sc-economia" id="sc50-val">—</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="no-data-msg" id="no-repetitivo-msg">
-          Sem atendimentos repetitivos, o argumento de automação não se aplica diretamente. Foque nos ganhos de receita e nos benchmarks de mercado abaixo.
-        </div>
-      </div>
+  <div class="score-board">
+    <div>
+      <div class="score-name rd">🚀 RD Station</div>
+      <div class="score-number rd">7</div>
+      <div class="score-label">Vantagens estratégicas</div>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div>
+      <div class="score-name kommo">🐙 Kommo</div>
+      <div class="score-number kommo">3</div>
+      <div class="score-label">Pontos de atenção</div>
     </div>
   </div>
 
-  <!-- ── BLOCO 2 ── -->
-  <p class="section-title" style="margin-top: 8px;">2. Potencial de receita via WhatsApp</p>
-  <div class="grid2" style="margin-bottom: 20px;">
-    <div class="card">
-      <h3>Dados de leads</h3>
-
-      <div class="field">
-        <label>Atendimentos com potencial comercial por mês</label>
-        <div class="field-hint">Quantas pessoas entram em contato com intenção de compra ou dúvidas comerciais pelo WhatsApp.</div>
-        <div class="field-row">
-          <input type="range" min="0" max="3000" step="10" value="300" id="s-leads" oninput="calc()">
-          <span class="field-val" id="v-leads">300</span>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Ticket médio (R$)</label>
-        <div class="field-hint">Valor médio de uma venda fechada.</div>
-        <div class="field-row">
-          <input type="range" min="50" max="10000" step="50" value="500" id="s-ticket" oninput="calc()">
-          <span class="field-val" id="v-ticket">R$500</span>
-        </div>
-      </div>
+  <div class="filter-bar">
+    <span class="filter-label">Filtrar:</span>
+    <button class="filter-btn active" data-filter="all">Tudo</button>
+    <button class="filter-btn" data-filter="win">✅ Onde ganhamos</button>
+    <button class="filter-btn kommo-filter" data-filter="lose">⚠️ Perigos Kommo</button>
+    <button class="filter-btn" data-filter="objection">💬 Objeções</button>
+    <button class="filter-btn" data-filter="killer">🎯 Killer Questions</button>
+    <button class="filter-btn" data-filter="compare">📊 Comparativo</button>
+    <div class="search-wrap">
+      <span>🔍</span>
+      <input type="text" id="search" placeholder="Buscar argumento...">
     </div>
+  </div>
 
-    <div class="card">
-      <h3>Taxa de conversão</h3>
-      <div class="field">
-        <label>O prospect sabe a taxa de conversão pelo WhatsApp?</label>
-        <div class="toggle-row" style="margin-top: 8px;">
-          <span class="toggle-label">Sim, sabe</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggle-blind" onchange="toggleBlind()">
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label" style="color:#DC2626; font-weight:600;">Não sabe</span>
+  <!-- ONDE GANHAMOS -->
+  <div class="section" id="section-win" data-section="win">
+    <div class="section-header">
+      <span class="section-emoji">🚀</span>
+      <span class="section-title">Onde a RD Station Massacra</span>
+      <span class="section-count" id="count-win">7 diferenciais</span>
+    </div>
+    <div class="cards-grid" id="grid-win">
+
+      <div class="card win animate-in" data-keywords="estabilidade infraestrutura robustez">
+        <div class="card-tag win">🏆 Diferencial</div>
+        <div class="card-title">Estabilidade Nativa de Plataforma</div>
+        <div class="card-body">O RD Conversas e o RD CRM são ferramentas <strong>mais estruturadas e consolidadas</strong>, oferecendo maior confiabilidade. A Kommo apresenta instabilidades com mais frequência, enquanto a RD conta com uma infraestrutura mais robusta e segura.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="suporte local português brasil">
+        <div class="card-tag win">🇧🇷 Brasil First</div>
+        <div class="card-title">Suporte 100% em Português</div>
+        <div class="card-body">Artigos, suporte e atendimento consultivo <strong>totalmente em português</strong>. A Kommo tem suporte global majoritariamente em Russo e Inglês — um risco real para operações que precisam de ajuda rápida no Brasil.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="funil completo marketing vendas roi dados">
+        <div class="card-tag win">📊 Visibilidade Total</div>
+        <div class="card-title">Funil Completo: Do Lead à Venda</div>
+        <div class="card-body">A RD entrega o funil <strong>de ponta a ponta</strong> — atração, nutrição e conversão. A Kommo entrega apenas o histórico do chat (final do funil). Sem Marketing, sua equipe depende de listas compradas ou sorte.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="integração nativa cliques fácil técnico">
+        <div class="card-tag win">🔌 Integração Nativa</div>
+        <div class="card-title">Integração em Poucos Cliques</div>
+        <div class="card-body">Não é necessário interromper a área técnica ou contratar especialista. A integração entre Conversacional e Vendas é <strong>nativa e automática</strong>, feita em minutos — sem plugins externos, sem falhas.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="dashboards relatórios personalizado gestão escala">
+        <div class="card-tag win">📈 Relatórios</div>
+        <div class="card-title">Dashboards Profissionais e Personalizados</div>
+        <div class="card-body">Dashboards de gestão de vendas <strong>completos e customizáveis</strong> que a Kommo não consegue entregar por ser focada apenas na interface de chat. Visibilidade clara de gargalos e produtividade por vendedor.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="mkt marketing alinha vendas landing page leads">
+        <div class="card-tag win">🔗 Ecossistema</div>
+        <div class="card-title">MKT + CRM + Conversas em Uma Só Plataforma</div>
+        <div class="card-body">RD integra nativamente <strong>Módulo de Marketing, CRM e Conversas</strong>. O lead cai no funil com todo o histórico de conversão pronto para o vendedor abordar. A Kommo não alinha MKT e Vendas.</div>
+      </div>
+
+      <div class="card win animate-in" data-keywords="autonomia configuração automação time negócio">
+        <div class="card-tag win">⚙️ Facilidade</div>
+        <div class="card-title">Autonomia para o Time de Negócio</div>
+        <div class="card-body">Plataforma <strong>intuitiva e amigável</strong>, desenhada para que o time de negócio tenha autonomia total na configuração de processos e fluxos — sem depender de TI ou desenvolvedores.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PERIGOS KOMMO -->
+  <div class="section" id="section-lose" data-section="lose">
+    <div class="section-header">
+      <span class="section-emoji">⚠️</span>
+      <span class="section-title">Onde a Kommo Atrai — e Como Rebater</span>
+      <span class="section-count" id="count-lose">3 pontos de atenção</span>
+    </div>
+    <div class="cards-grid" id="grid-lose">
+
+      <div class="card lose animate-in" data-keywords="barreira entrada perfil microempresa custo whatsapp imediatismo">
+        <div class="card-tag lose">⚠️ Perigo</div>
+        <div class="card-title">Agilidade e Baixa Barreira de Entrada</div>
+        <div class="card-body">A Kommo atrai principalmente microempresas e perfis de baixa complexidade (Perfil D) que buscam uma solução de entrada focada em imediatismo. Seus diferenciais competitivos residem no <strong>custo-benefício agressivo de curto prazo</strong>, com pacotes que integram CRM, Marketing e Chat por valores entre R$ 500,00 e R$ 1.000,00, além de uma interface otimizada para quem prioriza WhatsApp e redes sociais como únicos canais de venda.</div>
+      </div>
+
+      <div class="card lose animate-in" data-keywords="whatsapp chat interface conversacional vendas">
+        <div class="card-tag lose">⚠️ Perigo</div>
+        <div class="card-title">Interface de "Vendas por Chat" — Parece Completo</div>
+        <div class="card-body">O foco em vendas por WhatsApp brilha para quem não quer usar e-mail. <strong>Rebater:</strong> "Vender pelo WhatsApp é o fim do processo. Como você atrai novos contatos? Sem Marketing, você depende de compras de lista ou sorte."</div>
+      </div>
+
+      <div class="card lose animate-in" data-keywords="tudo em um único plataforma url">
+        <div class="card-tag lose">⚠️ Perigo</div>
+        <div class="card-title">"Tudo em Uma Plataforma" — A Armadilha do Genérico</div>
+        <div class="card-body">Clientes da Kommo não precisam trocar de URL entre CRM e Conversacional. <strong>Rebater:</strong> "Tudo em um pode entregar tudo de forma mais genérica. Qual o custo de usar um CRM com pouca profundidade em relatórios? Isso limita seus resultados."</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OBJEÇÕES -->
+  <div class="section" id="section-objection" data-section="objection">
+    <div class="section-header">
+      <span class="section-emoji">💬</span>
+      <span class="section-title">Guia de Quebra de Objeções</span>
+      <span class="section-count" id="count-objection">4 objeções</span>
+    </div>
+    <div id="list-objection">
+
+      <div class="objection-card animate-in" data-keywords="tudo em um relatórios visibilidade roi gestão">
+        <div class="objection-header" onclick="toggleObj(this)">
+          <span class="objection-icon">➰</span>
+          <span class="objection-question">"A Kommo é tudo em um."</span>
+          <span class="objection-toggle">▾</span>
         </div>
-
-        <div class="conv-slider visible" id="conv-known">
-          <div class="field-hint">De cada 100 leads que entram em contato, quantos fecham?</div>
-          <div class="field-row">
-            <input type="range" min="1" max="25" step="1" value="5" id="s-conv" oninput="calc()">
-            <span class="field-val" id="v-conv">5%</span>
-          </div>
-        </div>
-
-        <div class="blindspot" id="blindspot-panel">
-          <div class="blindspot-title">⚠ Custo da invisibilidade</div>
-          <div class="bs-stats">
-            <div class="bs-stat">
-              <div class="bs-val" id="bs1">—</div>
-              <div class="bs-lbl">Receita potencial perdida/mês (benchmark 5% conv.)</div>
-            </div>
-            <div class="bs-stat">
-              <div class="bs-val" id="bs2">—</div>
-              <div class="bs-lbl">Atendimentos sem follow-up adequado estimado</div>
-            </div>
-          </div>
-          <div class="blindspot-msg">
-            <strong>Como usar na conversa:</strong> "Você não sabe a taxa de conversão porque não tem esse dado centralizado — e isso já é um custo. Com os dashboards do RD Station Conversas você teria essa resposta em tempo real, e poderia agir antes de perder o lead."
+        <div class="objection-answer">
+          <div class="objection-answer-inner">
+            <div class="answer-label">✅ Argumento RD</div>
+            <div class="answer-text">As soluções "tudo em um" entregam tudo de forma <strong>mais genérica</strong> — e isso tem impacto direto no seu negócio.<br><br>A Kommo apresenta <strong>relatórios básicos e limitados</strong>: isso se torna um problema porque você não consegue ter visibilidade se está perdendo ou ganhando dinheiro, se está com ROI positivo.<br><br>Em termos de gestão, a falta de visibilidade dos dados impacta diretamente a satisfação e o crescimento do seu time. Sem essas informações, você não consegue identificar quem está performando bem ou mal, quantas horas por dia cada pessoa dedica ao atendimento, onde estão os gargalos da operação, entre outros pontos essenciais para a evolução do negócio.</div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ── BLOCO 3: PLANO ── -->
-  <p class="section-title">3. Valor do plano</p>
-  <div class="card" style="margin-bottom: 20px;">
-    <h3>Investimento no RD Station Conversas</h3>
-    <div class="field" style="margin-bottom: 0;">
-      <label>Qual o valor mensal do plano que o cliente pagaria? (R$)</label>
-      <div class="field-hint">Preencha com o valor do plano adequado para o perfil do prospect. O investimento anual é calculado automaticamente.</div>
-      <div class="field-row">
-        <input type="range" min="1300" max="6000" step="50" value="1300" id="s-plano" oninput="calc()">
-        <span class="field-val" id="v-plano">R$1.300/mês</span>
-      </div>
-      <div class="derived" style="margin-top: 10px;">
-        <span class="derived-label">Investimento anual total</span>
-        <span class="derived-val" id="d-plano-anual">R$15.600</span>
-      <p style="font-size:11px; color:#94A3B8; margin-top:10px;">* O valor considera apenas o valor do plano, sem considerar os gastos de conversas cobrados pela Meta.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── RESULTADOS ── -->
-  <div class="results">
-    <h3>Resultado estimado para este prospect</h3>
-
-    <div class="result-grid" style="grid-template-columns: repeat(4,1fr);">
-      <div class="stat" id="stat-economia">
-        <span class="tip-icon" data-tip="O que é: o dinheiro economizado porque atendimentos repetitivos passam a ser resolvidos pela automação, sem custo de tempo humano. Como calculamos: custo mensal de atendimento × % de atendimentos repetitivos (cenário selecionado).">i</span>
-        <div class="stat-val" id="r-economia">R$0</div>
-        <div class="stat-lbl">Economia c/<br>automação total</div>
-      </div>
-      <div class="stat" id="stat-parcial">
-        <span class="tip-icon" data-tip="O que é: tempo economizado pelo time com triagem automática — primeira resposta imediata 24/7, coleta de nome e e-mail, boas-vindas fora do horário. Mesmo atendimentos que ainda passam para o humano ficam mais rápidos. Como calculamos: custo mensal × 30%, estimativa conservadora de eficiência ganha.">i</span>
-        <div class="stat-val" id="r-parcial">R$0</div>
-        <div class="stat-lbl">Economia c/<br>automação parcial</div>
-      </div>
-      <div class="stat" id="stat-receita" style="padding-bottom: 10px;">
-        <span class="tip-icon" data-tip="O que é: receita adicional gerada com melhora na taxa de conversão — resultado de respostas mais rápidas, atendimento 24/7 e menos leads sem retorno. Como calculamos: leads/mês × % de melhora de conversão × ticket médio.">i</span>
-        <div class="stat-val" id="r-receita">R$0</div>
-        <div class="stat-lbl" id="r-receita-lbl" style="margin-bottom:8px;">Receita incremental<br><span id="cenario-label" style="color:#00A896; font-weight:700;">+1% conversão</span></div>
-        <div style="display:flex; gap:4px; justify-content:center; flex-wrap:wrap;">
-          <button class="cenario-btn active" id="cb1" onclick="selectCenario(1)">Conservador<br>+1%</button>
-          <button class="cenario-btn" id="cb3" onclick="selectCenario(3)">Possível<br>+3%</button>
-          <button class="cenario-btn" id="cb6" onclick="selectCenario(6)">Otimista<br>+6%</button>
+      <div class="objection-card animate-in" data-keywords="barato preço custo api whatsapp ban bloqueio meta">
+        <div class="objection-header" onclick="toggleObj(this)">
+          <span class="objection-icon">💸</span>
+          <span class="objection-question">"A Kommo é mais barata do que a RD."</span>
+          <span class="objection-toggle">▾</span>
         </div>
-      </div>
-      <div class="stat" id="stat-anual">
-        <span class="tip-icon" data-tip="O que é: soma de todos os ganhos ao longo de 12 meses — economia com automação total, parcial e receita incremental. Como calculamos: (automação total + automação parcial + receita incremental) × 12 meses. Não considera ganhos de retenção, NPS e dados operacionais.">i</span>
-        <div class="stat-val" id="r-anual">R$0</div>
-        <div class="stat-lbl">Ganho total<br>estimado em 12 meses</div>
-      </div>
-    </div>
-
-    <!-- Benefícios em linguagem clara -->
-    <div class="benefits-table">
-      <div class="benefits-title">O que isso significa na prática</div>
-      <div class="benefit-row">
-        <div class="benefit-icon">🤖</div>
-        <div class="benefit-body">
-          <div class="benefit-headline">Com 30% de automação parcial, você economiza <strong id="b1-val">R$0/mês</strong></div>
-          <div class="benefit-desc">Mesmo os atendimentos que ainda precisam de um humano ficam mais eficientes: o bot responde na hora, coleta as informações iniciais e direciona o cliente — tudo antes de o atendente abrir a conversa. Menos tempo gasto por atendimento, mais atendimentos resolvidos com a mesma equipe.</div>
-        </div>
-      </div>
-      <div class="benefit-row">
-        <div class="benefit-icon">📈</div>
-        <div class="benefit-body">
-          <div class="benefit-headline">Escale sua operação sem sobrecarregar o time — e sem precisar contratar mais ninguém</div>
-          <div class="benefit-desc">Com IA e automação, cada atendente resolve mais em menos tempo. O volume de atendimentos cresce, mas o custo não cresce na mesma proporção. Em vez de contratar uma nova pessoa quando a demanda aumentar, você configura — e a ferramenta absorve o pico sem atritos.</div>
-        </div>
-      </div>
-      <div class="benefit-row">
-        <div class="benefit-icon">🕐</div>
-        <div class="benefit-body">
-          <div class="benefit-headline">Atendimento 24/7: nenhum lead fica sem resposta por falta de horário</div>
-          <div class="benefit-desc">Clientes enviam mensagens no final de semana, à noite, fora do expediente. Sem automação, essas mensagens ficam paradas até o próximo dia útil — e parte dos leads desiste. Com o bot ativo, a resposta é imediata, o lead é acolhido e as informações são coletadas para quando o time retornar.</div>
-        </div>
-      </div>
-      <div class="benefit-row">
-        <div class="benefit-icon">💼</div>
-        <div class="benefit-body">
-          <div class="benefit-headline">Esse ganho anual equivale a <strong id="b4-val">0 meses</strong> do salário de um novo atendente</div>
-          <div class="benefit-desc">Em vez de ampliar o time para dar conta do volume, a automação gera uma economia equivalente — ou evita que esse gasto precise acontecer.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="rational">
-      <div class="rational-title">Como chegamos nesses números</div>
-      <div class="rational-row">
-        <span class="rational-desc">Custo mensal de atendimento</span>
-        <span class="rational-tip" id="f1-tip" data-tip="—">i</span>
-        <span class="rational-result" id="rr1">—</span>
-      </div>
-      <div class="rational-row">
-        <span class="rational-desc">Atendimentos automatizáveis</span>
-        <span class="rational-tip" id="f2-tip" data-tip="—">i</span>
-        <span class="rational-result" id="rr2">—</span>
-      </div>
-      <div class="rational-row">
-        <span class="rational-desc">Economia com automação total</span>
-        <span class="rational-tip" id="f3-tip" data-tip="—">i</span>
-        <span class="rational-result highlight" id="rr3">—</span>
-      </div>
-      <div class="rational-row">
-        <span class="rational-desc">Economia com automação parcial</span>
-        <span class="rational-tip" data-tip="O que é: tempo economizado pelo time com tarefas que a automação resolve parcialmente — primeira resposta imediata 24/7, coleta de nome e e-mail, mensagem de boas-vindas fora do horário. Como calculamos: custo mensal × 30%, estimativa conservadora de eficiência ganha mesmo em atendimentos que ainda passam para o humano.">i</span>
-        <span class="rational-result highlight" id="rr3b">—</span>
-      </div>
-      <div class="rational-row" id="rational-receita-row">
-        <span class="rational-desc">Receita incremental</span>
-        <span class="rational-tip" id="f4-tip" data-tip="—">i</span>
-        <span class="rational-result highlight" id="rr4">—</span>
-      </div>
-      <div class="rational-row">
-        <span class="rational-desc">Ganho total anual</span>
-        <span class="rational-tip" id="f5-tip" data-tip="—">i</span>
-        <span class="rational-result highlight" id="rr5">—</span>
-      </div>
-      <div class="rational-row">
-        <span class="rational-desc">Investimento anual no plano</span>
-        <span class="rational-tip" id="f6-tip" data-tip="—">i</span>
-        <span class="rational-result" id="rr6">—</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── BENCHMARKS ── -->
-  <p class="section-title" id="benchmarks">Benchmarks de mercado</p>
-  <p style="font-size:12px; color:#94A3B8; margin-bottom:14px;">Use estes dados com leads que ainda não têm visibilidade da operação ou que questionam a necessidade da ferramenta.</p>
-
-  <div class="benchmark-wrap" style="margin-bottom: 16px;">
-    <div class="bench-card">
-      <h3>Chatbot simples vs IA conversacional</h3>
-      <div class="compare-row"><span class="compare-dim">Entende contexto</span><div><span class="badge badge-r">Não</span> → <span class="badge badge-g">Sim</span></div></div>
-      <div class="compare-row"><span class="compare-dim">Personalização</span><div><span class="badge badge-r">Nenhuma</span> → <span class="badge badge-g">Alta: se adapta de acordo com o treinamento prévio da IA</span></div></div>
-    </div>
-
-    <div class="bench-card">
-      <h3>Humano puro vs IA + humano híbrido</h3>
-      <div class="compare-row"><span class="compare-dim">Disponibilidade</span><div><span class="badge badge-r">Horário comercial</span> → <span class="badge badge-g">24/7</span></div></div>
-      <div class="compare-row"><span class="compare-dim">Primeiro tempo de resposta</span><div><span class="badge badge-r">> 6h</span> → <span class="badge badge-g">< 4 min</span></div></div>
-      <div class="compare-row"><span class="compare-dim">Escalar volume</span><div><span class="badge badge-r">Contratar</span> → <span class="badge badge-g">Configurar</span></div></div>
-      <div class="bench-source">Fontes: Gartner (2024), Pylon Research 2025</div>
-    </div>
-  </div>
-
-  <!-- ── RISCO DE NÃO USAR API OFICIAL ── -->
-  <div class="benchmark-wrap" style="margin-bottom: 20px;">
-    <div class="risk-card">
-      <h3>Risco de não usar a API oficial do WhatsApp</h3>
-      <div class="risk-row">
-        <div class="risk-icon">🚫</div>
-        <div class="risk-body">
-          <div class="risk-title">Bloqueio temporário imediato</div>
-          <div class="risk-desc">Envio em massa sem API oficial é detectado automaticamente pela Meta. O número pode ser bloqueado sem aviso prévio.</div>
-          <span class="risk-stat">1 a 7 dias de bloqueio por violação</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">⛔</div>
-        <div class="risk-body">
-          <div class="risk-title">Suspensão prolongada ou banimento permanente</div>
-          <div class="risk-desc">Em casos graves ou reincidentes, a Meta suspende o número por 5, 7 ou 30 dias. Se o banimento for permanente, o número é perdido para sempre — junto com todo o histórico de conversas.</div>
-          <span class="risk-stat">30 dias ou banimento permanente</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">📉</div>
-        <div class="risk-body">
-          <div class="risk-title">Limite de envio reduzido progressivamente</div>
-          <div class="risk-desc">Quando usuários marcam mensagens como spam, a Meta reduz o volume máximo de mensagens do número — de milhares para algumas dezenas por dia.</div>
-          <span class="risk-stat">Capacidade de envio pode cair 90%+</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">⏳</div>
-        <div class="risk-body">
-          <div class="risk-title">Revisão de conta leva 24–48h</div>
-          <div class="risk-desc">Mesmo após solicitar revisão à Meta, o processo leva de 24 a 48 horas úteis. Durante esse período, a empresa fica sem o canal principal de atendimento.</div>
-          <span class="risk-stat">24–48h sem atendimento via WhatsApp</span>
-        </div>
-      </div>
-      <div class="bench-source">Fontes: Meta Business Messaging Policy, ycloud.com, chakrahq.com (2025)</div>
-    </div>
-
-    <div class="risk-card">
-      <h3>O que empresas perdem sem automação de atendimento</h3>
-      <div class="risk-row">
-        <div class="risk-icon">🛒</div>
-        <div class="risk-body">
-          <div class="risk-title">Abandono de compra por falta de suporte rápido</div>
-          <div class="risk-desc">Quando clientes não conseguem suporte imediato, a maioria desiste da compra — e não volta.</div>
-          <span class="risk-stat">67% abandonam a compra sem suporte rápido</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">💸</div>
-        <div class="risk-body">
-          <div class="risk-title">Custo operacional desnecessariamente alto</div>
-          <div class="risk-desc">Empresas gastam entre 15% e 25% da receita operacional com atendimento ao cliente. Grande parte disso pode ser automatizado.</div>
-          <span class="risk-stat">15–25% da receita operacional em atendimento</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">🔁</div>
-        <div class="risk-body">
-          <div class="risk-title">Time gasta tempo com perguntas repetitivas</div>
-          <div class="risk-desc">A maioria dos atendimentos são perguntas que poderiam ser resolvidas automaticamente, sem precisar de um humano.</div>
-          <span class="risk-stat">Até 80% dos atendimentos são repetitivos</span>
-        </div>
-      </div>
-      <div class="risk-row">
-        <div class="risk-icon">😤</div>
-        <div class="risk-body">
-          <div class="risk-title">Clientes não dão segunda chance</div>
-          <div class="risk-desc">No Brasil, a maioria dos consumidores não tenta de novo após um atendimento ruim.</div>
-          <span class="risk-stat">37% dos brasileiros não dão 2ª chance após mau atendimento</span>
-        </div>
-      </div>
-      <div class="bench-source">Fontes: jttecnologia.com.br (2025), vendedorprofissional.com.br (2025), Juniper Research (2024)</div>
-    </div>
-  </div>
-
-  <!-- ── BENCHMARKS DE TEMPO E BAN META ── -->
-  <div class="benchmark-wrap" style="margin-bottom: 20px;">
-    <div class="bench-card">
-      <h3>Benchmarks</h3>
-      <div class="compare-row"><span class="compare-dim">34% das empresas já contratam apenas ferramentas que tem IA (isso demonstra a relevância do uso no dia a dia)</span><span class="badge badge-g">(Panormas RD Station, 2025)</span></div>
-      <div class="compare-row"><span class="compare-dim">Aumento de produtividade em atendimento com IA</span><span class="badge badge-g">+14% tickets/hora (Freshworks)</span></div>
-      <div class="compare-row"><span class="compare-dim">Redução no tempo de resposta com automação</span><span class="badge badge-g">69% mais rápido (Gartner)</span></div>
-      <div class="compare-row"><span class="compare-dim">Problemas resolvidos mais rápido com IA assistida</span><span class="badge badge-g">47% mais rápido (Fullview, 2025)</span></div>
-      <div class="compare-row"><span class="compare-dim">31% dos times usam Chatbot no dia a dia</span><span class="badge badge-g">84% (Panorama RD Station, 2025)</span></div>
-      <div class="bench-source">Fontes: HubSpot State of AI 2024, Freshworks CX Benchmark, Gartner, Fullview 2025</div>
-    </div>
-
-    <div class="bench-card">
-      <h3>Risco de banimento sem API oficial — impacto em tempo</h3>
-      <div class="compare-row"><span class="compare-dim">Bloqueio por disparo em massa sem API</span><span class="badge badge-r">1 a 7 dias sem enviar</span></div>
-      <div class="compare-row"><span class="compare-dim">Suspensão grave ou reincidente</span><span class="badge badge-r">Até 30 dias bloqueado</span></div>
-      <div class="compare-row"><span class="compare-dim">Tempo de análise do recurso pela Meta</span><span class="badge badge-r">24 a 48h úteis</span></div>
-      <div class="compare-row"><span class="compare-dim">Envio em massa sem API pode reduzir limite de mensagens</span><span class="badge badge-r">Queda de 90%+ na capacidade</span></div>
-      <div class="compare-row"><span class="compare-dim">Risco de perda permanente do número</span><span class="badge badge-r">Banimento definitivo</span></div>
-      <div class="bench-source">Fontes: Meta Business Messaging Policy (2025), ycloud.com, chakrahq.com</div>
-    </div>
-  </div>
-  <div class="perguntas">
-    <h3>Perguntas importantes para o lead</h3>
-    <p class="casos-sub">Clique em qualquer card para ver como conduzir a conversa.</p>
-    <div class="perguntas-grid">
-
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">💰</div>
-          <div class="pq-q">Quantas pessoas fazem atendimento e quanto tempo ficam nisso?</div>
-          <div class="pq-arrow">▼</div>
-        </div>
-        <div class="pq-a">Essa pergunta revela o custo real — que raramente o prospect calcula. Quando você mostrar o número calculado (funcionários × salário × % do tempo), a reação costuma ser de surpresa. Use isso para abrir o racional de economia.
-          <span class="pergunta-tip">Use a calculadora acima para mostrar o número ao vivo.</span>
+        <div class="objection-answer">
+          <div class="objection-answer-inner">
+            <div class="answer-label">✅ Argumento RD</div>
+            <div class="answer-text">A Kommo tem um preço abaixo porque uma forma de contratação é através da API não oficial. Se for essa a forma contratada, sua empresa assume um <strong>risco operacional crítico</strong>.<br><br>O uso de APIs não oficiais permite envios em massa que a Meta detecta facilmente, podendo resultar em suspensões de 1 a 30 dias ou até no <strong>banimento permanente do número</strong> — fazendo com que a empresa perca todo o seu histórico de conversas.<br><br>Na RD Station, somos parceiros da Meta e todos os planos do RD Conversas utilizam a API oficial. Isso garante que sua operação não pare. <strong>Quanto custaria para sua operação ficar 72 horas — ou para sempre — sem o número que seus clientes já conhecem?</strong><br><br>Além disso, a Kommo não oferece pagamento mensal — o plano mínimo exige compromisso de 6 meses. A RD tem planos adaptados ao cenário brasileiro.</div>
+          </div>
         </div>
       </div>
 
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">🔁</div>
-          <div class="pq-q">O time precisa responder sempre as mesmas perguntas dos clientes?</div>
-          <div class="pq-arrow">▼</div>
+      <div class="objection-card animate-in" data-keywords="whatsapp só vendo marketing não preciso ecossistema">
+        <div class="objection-header" onclick="toggleObj(this)">
+          <span class="objection-icon">📱</span>
+          <span class="objection-question">"Eu só quero usar a Kommo pelo WhatsApp."</span>
+          <span class="objection-toggle">▾</span>
         </div>
-        <div class="pq-a">Exemplos: "qual o horário?", "como remarco?", "qual o prazo de entrega?", "segunda via do boleto?". Se o lead confirmar que sim, pergunte quantas por dia — isso ajuda a dimensionar o volume automatizável e torna o argumento de economia muito mais concreto.
-          <span class="pergunta-tip">Cada resposta repetida é um atendimento automatizável.</span>
-        </div>
-      </div>
-
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">📊</div>
-          <div class="pq-q">Você sabe quantos leads do WhatsApp efetivamente fecham?</div>
-          <div class="pq-arrow">▼</div>
-        </div>
-        <div class="pq-a">Se a resposta for "não sei" — esse é o argumento dos dashboards. Empresas sem visibilidade de conversão não conseguem melhorar o que não medem. Pergunte: "Quanto você acha que está perdendo por não saber isso?"
-          <span class="pergunta-tip">Ative o toggle "Não sabe" na calculadora para mostrar o potencial perdido.</span>
+        <div class="objection-answer">
+          <div class="objection-answer-inner">
+            <div class="answer-label">✅ Argumento RD</div>
+            <div class="answer-text">"Vender pelo WhatsApp é o <strong>fim do processo de vendas</strong>. A RD oferece um ecossistema completo que apoia sua empresa de ponta a ponta, impulsionando um fluxo de crescimento contínuo.<br><br>Quando você analisa apenas uma parte do processo, limita sua capacidade de expandir. Além disso, você conta com um time de especialistas que não só ajuda na configuração das ferramentas, mas também atua de forma estratégica para evoluir seus resultados.<br><br>A RD te dá a máquina completa: <strong>atração, nutrição e venda</strong>."</div>
+          </div>
         </div>
       </div>
 
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">⏱️</div>
-          <div class="pq-q">Se um cliente fica 10 min sem resposta no WhatsApp, o que acontece?</div>
-          <div class="pq-arrow">▼</div>
+      <div class="objection-card animate-in" data-keywords="técnico integração complexo configurar suporte ti">
+        <div class="objection-header" onclick="toggleObj(this)">
+          <span class="objection-icon">🛠️</span>
+          <span class="objection-question">"A Kommo parece mais fácil de configurar."</span>
+          <span class="objection-toggle">▾</span>
         </div>
-        <div class="pq-a">Essa pergunta traz à tona o churn invisível — o cliente que vai embora sem reclamar. Clientes com atendimentos resolvidos rápido são 2,4x mais fiéis (Forrester, 2024). Cada minuto de espera tem um custo que não aparece em relatório nenhum.
-          <span class="pergunta-tip">Argumento ideal para gestores de CS e operações.</span>
-        </div>
-      </div>
-
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">🤖</div>
-          <div class="pq-q">Vocês já têm alguma automação de atendimento? Como está funcionando?</div>
-          <div class="pq-arrow">▼</div>
-        </div>
-        <div class="pq-a">Se disserem "sim, temos um bot": pergunte qual a taxa de resolução. Chatbots simples resolvem 30–50% dos atendimentos. IA conversacional chega a 60–86%. A diferença não é tecnologia — é resultado. Se disserem "não": calcule o custo atual e mostre a economia imediata.
-          <span class="pergunta-tip">Use a tabela de benchmarks para mostrar os dados.</span>
-        </div>
-      </div>
-
-      <div class="pq-card" onclick="togglePQ(this)">
-        <div class="pq-top">
-          <div class="pq-icon">📈</div>
-          <div class="pq-q">Quando a demanda aumenta, o que acontece com o atendimento?</div>
-          <div class="pq-arrow">▼</div>
-        </div>
-        <div class="pq-a">A maioria responde: "a fila cresce" ou "a gente contrata temporários". Ambas mostram que escalar atendimento humano tem custo alto. Com automação, o pico de demanda não exige contratação — exige configuração.
-          <span class="pergunta-tip">Conecte com os funcionários e salários já preenchidos na calculadora.</span>
+        <div class="objection-answer">
+          <div class="objection-answer-inner">
+            <div class="answer-label">✅ Argumento RD</div>
+            <div class="answer-text">As configurações iniciais da Kommo podem ser <strong>complexas e exigem alto nível técnico</strong> para as integrações funcionarem corretamente. Isso por si só já pode gerar um custo não previsto no orçamento.<br><br>A RD tem um layout intuitivo, pensado para que o próprio time que usará a ferramenta consiga configurar as automações sem precisar de suporte de TI ou contratação de equipes técnicas externas.<br><br>E se precisar de apoio, você não ficará desamparado dependendo de um time fora do Brasil — como ocorre na Kommo. Nosso suporte e time de sucesso do cliente operam <strong>100% em português</strong>, prontos para apoiar na resolução de problemas.</div>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ── CASOS DE USO ── -->
- <div class="casos">
-    <h3>Casos de uso reais — clientes RD Station Conversas</h3>
-    <p class="casos-sub">Exemplos reais da comunidade RD Station de como clientes resolveram desafios com o produto.</p>
-    <div class="casos-grid">
+  <!-- KILLER QUESTIONS -->
+  <div class="section" id="section-killer" data-section="killer">
+    <div class="section-header">
+      <span class="section-emoji">🎯</span>
+      <span class="section-title">Killer Questions</span>
+      <span class="section-count" id="count-killer">5 perguntas</span>
+    </div>
+    <div id="list-killer">
 
-      <div class="caso-visual">
-        <div class="caso-emoji">🏷️</div>
-        <div class="caso-tag">RD Station Conversas</div>
-        <div class="caso-title">Organizar leads com etiquetas automáticas</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> Direcionar leads para fluxos diferentes manualmente, sem escala.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Etiquetas vinculadas a segmentações automáticas. Cada lead passou a ser direcionado para o fluxo certo sem intervenção humana.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V200002Uw2KV" target="_blank">Ver na comunidade →</a>
+      <div class="killer-card animate-in" data-keywords="autonomia automação configurar técnico">
+        <div class="killer-num">01</div>
+        <div class="killer-content">
+          <div class="killer-q">🤔 "Qual é o nível de autonomia que seu time terá para configurar automação sem suporte técnico especializado?"</div>
+          <div class="reality-block">As configurações iniciais são complexas e exigem alto conhecimento técnico para integrar.</div>
+          <div class="rd-block">Plataforma intuitiva e amigável — o time de negócio tem autonomia total para configurar processos e fluxos.</div>
+        </div>
       </div>
 
-      <div class="caso-visual">
-        <div class="caso-emoji">🤝</div>
-        <div class="caso-tag">RD Station Conversas</div>
-        <div class="caso-title">WhatsApp integrado ao funil consultivo</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> Negociações esfriando e histórico perdido nos celulares dos vendedores.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Templates por etapa do funil e automação por comportamento do lead. Histórico centralizado deu contexto ao vendedor em cada abordagem.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V200001J2OMZKA3/no-nosso-neg%C3%B3cio-temos-um-ciclo-de-venda-consultivo-como-posso-usar-o-whatsapp-de-forma-integrada-ao-funil-do-rd-crm-para-acelerar-negocia%C3%A7%C3%B5es-e-manter-leads-engajados" target="_blank">Ver na comunidade →</a>
+      <div class="killer-card animate-in" data-keywords="suporte português operação trava">
+        <div class="killer-num">02</div>
+        <div class="killer-content">
+          <div class="killer-q">🤔 "Onde você busca suporte imediato e em português quando sua operação trava no meio do dia?"</div>
+          <div class="reality-block">Suporte limitado e global, com artigos majoritariamente em Russo e Inglês.</div>
+          <div class="rd-block">Suporte completo e consultivo em português, com entendimento profundo do mercado brasileiro.</div>
+        </div>
       </div>
 
-      <div class="caso-visual">
-        <div class="caso-emoji">💬</div>
-        <div class="caso-tag">RD Station Conversas</div>
-        <div class="caso-title">Chatbot com escalada humana inteligente</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> Time gastando tempo com atendimentos simples, sem espaço para casos complexos.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Chatbot resolve dúvidas repetitivas e transfere automaticamente os casos complexos. O time passou a receber só o que precisava de atenção.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V2000031gRE1" target="_blank">Ver na comunidade →</a>
+      <div class="killer-card animate-in" data-keywords="leads geração atração orgânico whatsapp">
+        <div class="killer-num">03</div>
+        <div class="killer-content">
+          <div class="killer-q">🤔 "Como você pretende atrair novos leads de forma orgânica e previsível além do WhatsApp?"</div>
+          <div class="reality-block">Foca apenas na conversão de leads que já chegaram (final do funil), sem ferramentas de atração.</div>
+          <div class="rd-block">Cobre toda a jornada: Landing Pages, formulários e gestão de anúncios para abastecer o CRM com novos leads.</div>
+        </div>
       </div>
 
-      <div class="caso-visual">
-        <div class="caso-emoji">📋</div>
-        <div class="caso-tag">RD Marketing + Conversas</div>
-        <div class="caso-title">Fim das planilhas e do WhatsApp pessoal</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> Leads em planilhas e abordados pelo WhatsApp pessoal dos vendedores geram falta de visibilidade do andamento das negociações e sem histórico.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Passagem de bastão automatizada por qualificação. Vendedor recebe contexto completo antes de abrir a conversa e atendimento padronizado com templates.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V200002ndOmG" target="_blank">Ver na comunidade →</a>
+      <div class="killer-card animate-in" data-keywords="crescimento escala relatórios produtividade time">
+        <div class="killer-num">04</div>
+        <div class="killer-content">
+          <div class="killer-q">🤔 "Se sua empresa crescer 3x este ano, como o CRM vai garantir visibilidade da produtividade do time?"</div>
+          <div class="reality-block">Relatórios básicos, prontos e sem customização — dificulta a gestão de times em escala.</div>
+          <div class="rd-block">Dashboards personalizados e análises completas de performance — gargalos no funil e produtividade por vendedor.</div>
+        </div>
       </div>
 
-      <div class="caso-visual">
-        <div class="caso-emoji">📡</div>
-        <div class="caso-tag">RD Station Conversas</div>
-        <div class="caso-title">Redução do tempo de espera e vácuo de leads</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> otimizar o atendimento ao cliente, evitando que leads fiquem no vácuo e garantindo que o tempo da equipe seja dedicado a questões mais complexas, em vez de responder perguntas repetitiva.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Utilizar um chatbot para lidar com tarefas repetitivas e transferir conversas complexas para um atendente humano, otimizando o tempo da equipe e a experiência do lead.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V2000031gRE1KAM/dica-chatbots" target="_blank">Ver na comunidade →</a>
-      </div>
-
-      <div class="caso-visual">
-        <div class="caso-emoji">🏠</div>
-        <div class="caso-tag">RD Station Conversas + RD Station Marketing + RD Station CRM</div>
-        <div class="caso-title">Uso do WhatsApp para agilizar o processo de atendimento e qualificação</div>
-        <div class="caso-desafio"><strong>Desafio:</strong> Escalar o atendimento e a qualificação de leads no agronegócio, reduzindo o Tempo Médio de Espera (TME). O setor sofria com processos manuais de prospecção, perda de oportunidades no CRM e dificuldade em prestar suporte técnico rápido ao produtor rural após a compra.</div>
-        <div class="caso-solucao"><strong>Solução:</strong> Implementação de Agentes de IA e Bots integrados ao RD Station Marketing e CRM para automatizar a qualificação, distribuição por DDD e cadência comercial. A estratégia incluiu ativações ativas via WhatsApp para lançamentos, recuperação de vendas perdidas e uso de QR Codes em produtos para suporte técnico imediato.</div>
-        <a class="caso-link" href="https://rdconectacomunidade.rdstation.com/s/question/0D5V200000x1qw8KAA/como-uso-estrat%C3%A9gias-de-whatsapp-nas-empresas-do-agro" target="_blank">Ver na comunidade →</a>
+      <div class="killer-card animate-in" data-keywords="landing page importação leads automático manual registro">
+        <div class="killer-num">05</div>
+        <div class="killer-content">
+          <div class="killer-q">🤔 "Como você automatiza a importação e o pré-registro de novos leads sem trabalho manual?"</div>
+          <div class="reality-block">Integração com Landing Pages é complexa e difícil segundo alguns usuários da Kommo — obriga uso de ferramentas externas para capturar dados.</div>
+          <div class="rd-block">Integração nativa e automática entre Marketing, CRM e Conversacional — o lead cai no funil com histórico completo.</div>
+        </div>
       </div>
 
     </div>
   </div>
+
+  <!-- COMPARATIVO -->
+  <div class="section" id="section-compare" data-section="compare">
+    <div class="section-header">
+      <span class="section-emoji">📊</span>
+      <span class="section-title">Comparativo Direto</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="compare-table" id="compare-table">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th class="kommo-head">🐙 Kommo</th>
+            <th class="rd-head">🚀 RD Station</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-keywords="funil cobertura atração conversão">
+            <td>Cobertura de Funil</td>
+            <td><span class="lose-dot"></span>Apenas conversão (final de funil) com funcionalidades de CRM e Conversacional</td>
+            <td><span class="win-dot"></span> Possui um ecossistema de produtos completo que se integram de forma nativa e vai da atração, nutrição e conversão de leads </td>
+          </tr>
+          <tr data-keywords="automação marketing vendas">
+            <td>Automação</td>
+            <td><span class="lose-dot"></span>Foco exclusivo em tarefas de vendas</td>
+            <td><span class="win-dot"></span>O RD Conversas permite automações que se conectam com ações de marketing (como disparo de whatsapp). Além disso, os produtos RD CRM e RD Marketing se integram de forma nativa entre si, facilitando para empresas que precisam de operações de marketing e vendas mais conectada.</td>
+          </tr>
+          <tr data-keywords="relatórios dashboards métricas">
+            <td>Relatórios</td>
+            <td><span class="lose-dot"></span>Básicos e limitados, sem muita opção de personalização</td>
+            <td><span class="win-dot"></span>Múltiplos relatórios, desde básicos e templates padrões, até Dashboards personalizados que se adapta a necessidade de cada negócioado</td>
+          </tr>
+          <tr data-keywords="comunicação canais omnichannel">
+            <td>Comunicação</td>
+            <td><span class="lose-dot"></span>Possui múltiplos canais como Whatsapp, Instagram e Tik Tok, mas a estrutura da ferramenta só foca nesta comunicação na hora da venda e ignora outras etapas como atração, relacionamento e conversão,</td>
+            <td><span class="win-dot"></span> Tem um ecossistema de produtos que possibilita a conexão de multiplos canais. No RD Marketing temos a parte de atrair com features de redes sociais, relacionar através de email, sms e whatsapp. No CRM, temos o Whatsapp na palma da mão para atualizar as negociações através da Rê, Webphone para fazer ligações direto do CRM e ainda o Whatsapp web. Já o RD Conversas dispara e centraliza conversas do Whatsapp e de outros canais. Se o cliente integra Conversas e CRM, ele ainda tem a potencia de uma ferramenta completa de gestão de vendas (CRM), e centralização do atendimento (Conversas) que se integra e troca informações, sem precisar sair da tela ou fazer tarefas manuais.</td>
+          </tr>
+          <tr data-keywords="facilidade uso curva aprendizado intuitivo">
+            <td>Facilidade de Uso</td>
+            <td><span class="lose-dot"></span>Curva de aprendizado técnica elevada</td>
+            <td><span class="win-dot"></span>Integração e Layout intuitivo, amigável e sem necessidade de um time técnico para integrar</td>
+          </tr>
+          <tr data-keywords="suporte local português brasil">
+            <td>Suporte Local</td>
+            <td><span class="lose-dot"></span>Global (Russo/Inglês)</td>
+            <td><span class="win-dot"></span>Consultivo 100% em Português</td>
+          </tr>
+          <tr data-keywords="integração marketing crm nativa">
+            <td>Integração MKT + CRM</td>
+            <td><span class="lose-dot"></span> A Kommo não tem uma ferramenta de marketing nativa e com isso seus clientes precisam integrar com outras plataformas. Para empresas que querem integrar melhor as operações, isso pode gerar uma dificuldade de troca de dados entre plataformas, pois integrações não-nativas e plataformas de empresas diferentes podem ter dados envio de dados que se conectam entre si (ex: um pode chamar de lead e outro de contato, dificultando o envio de dados). Ou ainda, pode exigir uma integração complexa, que exige que a empresa entre em contato com seu time de TI ou ainda contratar um fornecedor externo</td>
+            <td><span class="win-dot"></span> A RD Station, tem ferramentas de Marketing, Vendas e atendimento, que se integram de forma nativa entre si, facilitando integração entre áreas e fluidez entre dados</td>
+          </tr>
+          <tr data-keywords="api whatsapp meta oficial segurança ban">
+            <td>API WhatsApp</td>
+            <td><span class="lose-dot"></span>Planos com API não oficial (risco de ban)</td>
+            <td><span class="win-dot"></span>API oficial Meta em todos os planos</td>
+          </tr>
+          <tr data-keywords="contrato pagamento mensal preço custo">
+            <td>Pagamento</td>
+            <td><span class="lose-dot"></span>Mínimo 6 meses de compromisso</td>
+            <td><span class="win-dot"></span>Planos flexíveis adaptados ao Brasil</td>
+          </tr>
+          <tr data-keywords="escalabilidade crescimento">
+            <td>Escalabilidade</td>
+            <td><span class="lose-dot"></span>Trava quando a empresa cresce</td>
+            <td><span class="win-dot"></span>Flexível para escalar processos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>Battle Card <strong>RD Station vs Kommo</strong> · Uso interno da equipe de vendas</p>
+    <p style="margin-top:6px; font-size:11px;">Documento atualizado conforme mudanças de mercado.</p>
+  </footer>
 
 </div>
 
-<footer>
-  RD Station Conversas · Framework de ROI para vendedores<br>
-  Fontes dos benchmarks: Forrester (2024), Gartner (2024), Freshworks CX Benchmark 2025, Pylon Research 2025, ResearchGate, Juniper Research (2024), Meta Business Messaging Policy (2025), jttecnologia.com.br, vendedorprofissional.com.br.<br>
-  Casos de uso: Comunidade RD Station (rdconectacomunidade.rdstation.com)
-</footer>
-
 <script>
-var autoRate = 0.30;
-var temRepetitivo = true;
-var cenarioPct = 1; // conversão incremental padrão conservador
+  async function submitModal() {
+    const nome = document.getElementById('modal-nome').value.trim();
+    const opp  = document.getElementById('modal-opp').value.trim();
+    const errNome = document.getElementById('error-nome');
+    const errOpp  = document.getElementById('error-opp');
+    const btn = document.querySelector('.modal-btn');
 
-function selectCenario(pct) {
-  cenarioPct = pct;
-  [1,3,6].forEach(function(p) {
-    document.getElementById('cb'+p).classList.toggle('active', p === pct);
-  });
-  var labels = {1:'Conservador +1%', 3:'Possível +3%', 6:'Otimista +6%'};
-  document.getElementById('cenario-label').textContent = labels[pct];
-  calc();
-}
+    let valid = true;
 
-function selectRepetitivo(val) {
-  temRepetitivo = val === 'sim';
-  document.getElementById('btn-sim').className = 'yn-btn' + (temRepetitivo ? ' active-yes' : '');
-  document.getElementById('btn-nao').className = 'yn-btn' + (!temRepetitivo ? ' active-no' : '');
-  document.getElementById('scenarios-box').classList.toggle('visible', temRepetitivo);
-  document.getElementById('no-repetitivo-msg').classList.toggle('visible', !temRepetitivo);
-  if (!temRepetitivo) autoRate = 0;
-  else autoRate = 0.30;
-  calc();
-}
+    if (!nome) {
+      errNome.style.display = 'block';
+      document.getElementById('modal-nome').style.borderColor = '#ff009e';
+      valid = false;
+    } else {
+      errNome.style.display = 'none';
+      document.getElementById('modal-nome').style.borderColor = '';
+    }
 
-function selectScenario(pct) {
-  [10,30,50].forEach(function(p) {
-    document.getElementById('sc'+p).classList.toggle('active', p === pct);
-  });
-  autoRate = pct / 100;
-  calc();
-}
+    if (!opp) {
+      errOpp.style.display = 'block';
+      document.getElementById('modal-opp').style.borderColor = '#ff009e';
+      valid = false;
+    } else {
+      errOpp.style.display = 'none';
+      document.getElementById('modal-opp').style.borderColor = '';
+    }
 
-function toggleBlind() {
-  var isBlind = document.getElementById('toggle-blind').checked;
-  document.getElementById('conv-known').classList.toggle('visible', !isBlind);
-  document.getElementById('blindspot-panel').classList.toggle('visible', isBlind);
-  document.getElementById('stat-receita').classList.toggle('dimmed', isBlind);
-  document.getElementById('rational-receita-row').style.opacity = isBlind ? '0.3' : '1';
-  var roiBox = document.getElementById('roi-box');
-  if (isBlind) {
-    roiBox.style.background = '#475569';
-    document.getElementById('roi-title').textContent = 'ROI parcial (só custo operacional)';
-    document.getElementById('roi-sub').textContent = 'Receita incremental não calculada — use o painel vermelho como argumento de venda dos dashboards.';
-  } else {
-    roiBox.style.background = '#00A896';
-    document.getElementById('roi-title').textContent = 'ROI estimado (12 meses)';
-    document.getElementById('roi-sub').textContent = 'Conservador. Não considera ganhos de retenção, NPS, dados operacionais e produtividade do time.';
-  }
-  calc();
-}
+    if (!valid) return;
 
-function togglePQ(el) {
-  el.classList.toggle('open');
-  el.querySelector('.pq-a').classList.toggle('open');
-}
+    btn.textContent = "Enviando...Aguarde um momento ⏳";
+    btn.disabled = true;
 
-function fmt(n) { return 'R$' + Math.round(n).toLocaleString('pt-BR'); }
-function fmtN(n) { return Math.round(n).toLocaleString('pt-BR'); }
+    const agora = new Date().toLocaleString('pt-BR');
 
-function calc() {
-  var func    = +document.getElementById('s-func').value;
-  var salario = +document.getElementById('s-salario').value;
-  var tempo   = +document.getElementById('s-tempo').value / 100;
-  var atend   = +document.getElementById('s-atend').value;
-  var leads   = +document.getElementById('s-leads').value;
-  var ticket  = +document.getElementById('s-ticket').value;
-  var plano   = +document.getElementById('s-plano').value;
-  var investAnual = plano * 12;
-  var isBlind = document.getElementById('toggle-blind').checked;
+    const urlPlanilha = "https://script.google.com/macros/s/AKfycbxtSJ0UoSrYAar7qvfRUDEk8bdX2WRXaJbLtg0Z1TxLmeJrAjZDiA64M5g5bRbkR3nu/exec";
 
-  // Update display values
-  document.getElementById('v-func').textContent    = func;
-  document.getElementById('v-salario').textContent = fmt(salario);
-  document.getElementById('v-tempo').textContent   = Math.round(tempo*100) + '%';
-  document.getElementById('v-atend').textContent   = fmtN(atend);
-  document.getElementById('v-leads').textContent   = fmtN(leads);
-  document.getElementById('v-ticket').textContent  = fmt(ticket);
-  document.getElementById('v-plano').textContent   = fmt(plano) + '/mês';
-  document.getElementById('d-plano-anual').textContent = fmt(investAnual);
+    try {
+      await fetch(urlPlanilha, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: nome,
+          oportunidade: opp,
+          dataHora: agora
+        })
+      });
 
-  var custoMensal    = func * salario * tempo;
-  var custoPorAtend  = atend > 0 ? custoMensal / atend : 0;
-  var atendAuto      = Math.round(atend * autoRate);
-  var economiaMes    = custoMensal * autoRate;        // automação total
-  var economiaParcial = custoMensal * 0.30;           // automação parcial: 1ª resposta, coleta dados, 24/7
+      document.getElementById('modal-form-state').style.display = 'none';
+      document.getElementById('success-nome').textContent = nome.split(' ')[0];
+      document.getElementById('modal-success').style.display = 'block';
 
-  document.getElementById('d-custo-total').textContent = fmt(custoMensal) + '/mês';
-  document.getElementById('d-custo-por').textContent   = fmt(custoPorAtend) + '/atend.';
-  document.getElementById('r-economia').textContent    = fmt(economiaMes) + '/mês';
-  document.getElementById('r-parcial').textContent     = fmt(economiaParcial) + '/mês';
-  document.getElementById('b1-val') && (document.getElementById('b1-val').textContent = fmt(economiaParcial) + '/mês');
-  var mesesEquiv = salario > 0 ? (economiaParcial * 12 / salario).toFixed(1) : 0;
-  document.getElementById('b4-val') && (document.getElementById('b4-val').textContent = mesesEquiv + ' meses');
+      document.getElementById('bar-nome').textContent = nome;
+      document.getElementById('bar-opp').textContent  = opp;
 
-  // Update scenario cards with economy values
-  [10,30,50].forEach(function(pct) {
-    var econ = custoMensal * (pct/100);
-    document.getElementById('sc'+pct+'-val').textContent = 'Economia: ' + fmt(econ) + '/mês';
-  });
-
-  // Rational tooltips — o que é + como calculamos
-  document.getElementById('f1-tip').dataset.tip  = 'O que é: o total que a empresa gasta por mês com funcionários dedicados ao atendimento — salário, encargos e o tempo que cada um passa respondendo clientes. Como calculamos: ' + func + ' funcionário(s) × R$' + salario.toLocaleString('pt-BR') + ' de salário × ' + Math.round(tempo*100) + '% do tempo em atendimento.';
-  document.getElementById('rr1').textContent  = fmt(custoMensal) + '/mês';
-
-  document.getElementById('f2-tip').dataset.tip  = 'O que é: o número de atendimentos que poderiam ser resolvidos 100% por automação, sem precisar de nenhum humano — perguntas repetitivas como horário, preço, status de pedido. Como calculamos: ' + fmtN(atend) + ' atendimentos/mês × ' + Math.round(autoRate*100) + '% de repetitivos (cenário selecionado).';
-  document.getElementById('rr2').textContent  = fmtN(atendAuto) + ' atendimentos';
-
-  document.getElementById('f3-tip').dataset.tip  = 'O que é: o dinheiro que a empresa deixa de gastar porque esses atendimentos passam a ser resolvidos pela automação, sem custo de tempo humano. Como calculamos: ' + fmt(custoMensal) + ' de custo mensal × ' + Math.round(autoRate*100) + '% de atendimentos automatizáveis.';
-  document.getElementById('rr3').textContent  = fmt(economiaMes) + '/mês';
-
-  document.getElementById('rr3b').textContent = fmt(economiaParcial) + '/mês';
-
-  document.getElementById('f6-tip').dataset.tip  = 'O que é: o total que a empresa investiria no RD Station Conversas ao longo de 12 meses. Como calculamos: ' + fmt(plano) + '/mês × 12 meses. Não inclui custos de conversas cobrados pela Meta.';
-  document.getElementById('rr6').textContent  = fmt(investAnual);
-
-  if (isBlind) {
-    var receitaPot = leads * (cenarioPct/100) * ticket;
-    document.getElementById('bs1').textContent = fmt(receitaPot);
-    document.getElementById('bs2').textContent = fmtN(Math.round(leads * 0.40)) + ' atend.';
-    document.getElementById('r-receita').textContent = '—';
-    document.getElementById('f4-tip').dataset.tip = 'O que é: receita adicional gerada com melhora na taxa de conversão via atendimento mais rápido e consistente. Como calculamos: não calculado — prospect não tem dado de conversão atual. Use o painel vermelho ao lado para mostrar o potencial perdido.';
-    document.getElementById('rr4').textContent = '—';
-    var totalAnualBlind = (economiaMes + economiaParcial) * 12;
-    document.getElementById('r-anual').textContent = fmt(totalAnualBlind);
-    document.getElementById('f5-tip').dataset.tip = 'O que é: soma de todos os ganhos ao longo de 12 meses — economia com automação total e parcial. A receita incremental não foi incluída por falta de dado de conversão do prospect. Como calculamos: (' + fmt(economiaMes) + ' automação total + ' + fmt(economiaParcial) + ' automação parcial) × 12 meses.';
-    document.getElementById('rr5').textContent = fmt(totalAnualBlind);
-    document.getElementById('r-roi').textContent = investAnual > 0 ? (totalAnualBlind/investAnual).toFixed(1)+'x' : '0x';
-  } else {
-    var receitaIncr = leads * (cenarioPct/100) * ticket;
-    var totalAnual  = (economiaMes + economiaParcial + receitaIncr) * 12;
-    document.getElementById('r-receita').textContent = fmt(receitaIncr) + '/mês';
-    document.getElementById('r-anual').textContent   = fmt(totalAnual);
-    document.getElementById('f4-tip').dataset.tip = 'O que é: a receita adicional que a empresa pode gerar com uma melhora na taxa de conversão — resultado de respostas mais rápidas, atendimento 24/7 e menos leads sem retorno. Como calculamos: ' + fmtN(leads) + ' leads/mês × +' + cenarioPct + '% de conversão incremental × ' + fmt(ticket) + ' de ticket médio.';
-    document.getElementById('rr4').textContent = fmt(receitaIncr) + '/mês';
-    document.getElementById('f5-tip').dataset.tip = 'O que é: a soma de tudo que a empresa ganha ou economiza em 12 meses com a ferramenta — automação total, automação parcial e receita incremental. Como calculamos: (' + fmt(economiaMes) + ' automação total + ' + fmt(economiaParcial) + ' automação parcial + ' + fmt(receitaIncr) + ' receita incremental) × 12 meses.';
-    document.getElementById('rr5').textContent = fmt(totalAnual);
-    document.getElementById('r-roi').textContent = investAnual > 0 ? (totalAnual/investAnual).toFixed(1)+'x' : '0x';
-  }
-}
-
-calc();
-</script>
-<script>
-// Pop-up lembrete de oportunidade
-var popupSalvo = false;
-var popupFechado = false;
-var popupMostrado = false;
-
-function fecharPopup() {
-  document.getElementById('popup-opp').classList.remove('visible');
-  popupFechado = true;
-}
-
-function irParaFormulario() {
-  document.getElementById('form-identificacao').scrollIntoView({ behavior: 'smooth' });
-  document.getElementById('sf_id').focus();
-  fecharPopup();
-}
-
-window.addEventListener('scroll', function() {
-  if (popupSalvo || popupFechado) return;
-  var scrolled = window.scrollY || document.documentElement.scrollTop;
-  var total = document.documentElement.scrollHeight - window.innerHeight;
-  var pct = total > 0 ? scrolled / total : 0;
-  // Aparece quando o usuário passou de 35% da página e ainda não preencheu
-  if (pct > 0.35 && !popupMostrado) {
-    var opp = document.getElementById('sf_id') ? document.getElementById('sf_id').value.trim() : '';
-    var nome = document.getElementById('vendedor_nome') ? document.getElementById('vendedor_nome').value : '';
-    if (!opp || !nome) {
-      document.getElementById('popup-opp').classList.add('visible');
-      popupMostrado = true;
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao salvar na planilha.");
+      btn.textContent = "Acessar Battle Card →";
+      btn.disabled = false;
     }
   }
-});
 
-// Esconde popup quando os campos são preenchidos
-function checkFormFilled() {
-  var opp  = document.getElementById('sf_id') ? document.getElementById('sf_id').value.trim() : '';
-  var nome = document.getElementById('vendedor_nome') ? document.getElementById('vendedor_nome').value : '';
-  if (opp && nome) {
-    document.getElementById('popup-opp').classList.remove('visible');
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    document.getElementById('registro-bar').classList.add('visible');
   }
-}
-function fecharExitPopup() {
-  document.getElementById('exit-overlay').classList.remove('visible');
-}
 
-function irParaFormularioExit() {
-  fecharExitPopup();
-  document.getElementById('form-identificacao').scrollIntoView({ behavior: 'smooth' });
-  setTimeout(function() { document.getElementById('sf_id').focus(); }, 400);
-}
+  document.getElementById('modal-nome').addEventListener('input', function() {
+    document.getElementById('error-nome').style.display = 'none';
+    this.style.borderColor = '';
+  });
+  document.getElementById('modal-opp').addEventListener('input', function() {
+    document.getElementById('error-opp').style.display = 'none';
+    this.style.borderColor = '';
+  });
 
-// Exit intent: detecta mouse saindo pelo topo da janela
-var exitMostrado = false;
-document.addEventListener('mouseleave', function(e) {
-  if (e.clientY <= 10 && !exitMostrado && !popupSalvo) {
-    var opp  = document.getElementById('sf_id') ? document.getElementById('sf_id').value.trim() : '';
-    var nome = document.getElementById('vendedor_nome') ? document.getElementById('vendedor_nome').value : '';
-    if (!opp || !nome) {
-      document.getElementById('exit-overlay').classList.add('visible');
-      exitMostrado = true;
-    }
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const sections = {
+    win:       document.getElementById('section-win'),
+    lose:      document.getElementById('section-lose'),
+    objection: document.getElementById('section-objection'),
+    killer:    document.getElementById('section-killer'),
+    compare:   document.getElementById('section-compare'),
+  };
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      if (filter === 'all') {
+        Object.values(sections).forEach(s => s.classList.remove('hidden'));
+      } else {
+        Object.entries(sections).forEach(([key, el]) => {
+          el.classList.toggle('hidden', key !== filter);
+        });
+      }
+      updateSearch();
+    });
+  });
+
+  const searchInput = document.getElementById('search');
+
+  function updateSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+
+    ['win', 'lose'].forEach(type => {
+      const grid = document.getElementById(`grid-${type}`);
+      if (!grid) return;
+      const cards = grid.querySelectorAll('.card');
+      let visible = 0;
+      cards.forEach(card => {
+        const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+        const show = !query || text.includes(query);
+        card.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      const count = document.getElementById(`count-${type}`);
+      if (count) count.textContent = `${visible} ${type === 'win' ? 'diferenciais' : 'pontos de atenção'}`;
+    });
+
+    const objCards = document.querySelectorAll('#list-objection .objection-card');
+    let objVisible = 0;
+    objCards.forEach(card => {
+      const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+      const show = !query || text.includes(query);
+      card.classList.toggle('hidden', !show);
+      if (show) objVisible++;
+    });
+    const countObj = document.getElementById('count-objection');
+    if (countObj) countObj.textContent = `${objVisible} objeções`;
+
+    const killerCards = document.querySelectorAll('#list-killer .killer-card');
+    let killerVisible = 0;
+    killerCards.forEach(card => {
+      const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+      const show = !query || text.includes(query);
+      card.classList.toggle('hidden', !show);
+      if (show) killerVisible++;
+    });
+    const countKiller = document.getElementById('count-killer');
+    if (countKiller) countKiller.textContent = `${killerVisible} perguntas`;
+
+    document.querySelectorAll('#compare-table tbody tr').forEach(row => {
+      const text = (row.textContent + ' ' + (row.dataset.keywords || '')).toLowerCase();
+      row.classList.toggle('hidden', !(!query || text.includes(query)));
+    });
   }
-});
+
+  searchInput.addEventListener('input', updateSearch);
+
+  function toggleObj(header) {
+    const card = header.closest('.objection-card');
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.objection-card').forEach(c => c.classList.remove('open'));
+    if (!isOpen) card.classList.add('open');
+  }
 </script>
 </body>
 </html>
